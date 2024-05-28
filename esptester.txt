@@ -1,0 +1,68 @@
+#include <SPI.h>
+#include <HttpClient.h>
+#include <ESP8266WiFi.h>
+//#include <ESP8266HTTPClient.h>
+#include <ESP8266WiFiMulti.h>
+#include <WiFiClientSecure.h>
+#include <ArduinoJson.h>
+
+WiFiClient access;
+ESP8266WiFiMulti wifimulti;
+HttpClient http(access);
+JsonDocument key;
+String keyf; 
+const char* ssid = "Walter";
+const char* password = "njalo1994";
+const char* sheetyEndpoint = "https://turtle.wuaze.com/";
+//const char* fingerprint = "4c9547c1a25874a1d80d26c183144f2d6897aaa7a7bc0a019130ed4a88e4ddea";
+//const char* fingerprint = "0aec295421fb700c236efae3d6a87094ee7035b1a8b8e794f8266267e5d7856d";
+void setup() {
+  Serial.begin(9600);
+  delay(10);
+ // access.connect("https://turtle.wuaze.com/", 443);
+ key["certificate"] = "4c9547c1a25874a1d80d26c183144f2d6897aaa7a7bc0a019130ed4a88e4ddea";
+//key["Public Key"] = "37dc59b8a521206ae70e727dd3e7303644ff6d31a1b2195642077621a5bdac7b";
+serializeJson(key, keyf);
+const char* fingerprint = "4c9547c1a25874a1d80d26c183144f2d6897aaa7a7bc0a019130ed4a88e4ddea";
+  WiFi.mode(WIFI_STA);
+  wifimulti.addAP("Walter", "njalo1994");
+  wifimulti.addAP("WALTER", "njalo1994");
+  wifimulti.addAP("realme C33", "vincentismyname");
+  while (wifimulti.run() != WL_CONNECTED) {
+    delay(250);
+    Serial.println("Connecting to WiFi...");
+  }
+  Serial.println("Connected to WiFi");
+  Serial.println(WiFi.localIP());
+  Serial.println(WiFi.SSID());
+  //access.setFingerprint(fingerprint);
+  Serial.println(fingerprint);
+}
+
+void loop() {
+  if (wifimulti.run() == WL_CONNECTED) {
+    
+
+    // Make a GET request to the Sheety API endpoint
+   
+//http.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.150 Safari/537.36");
+  //http.addHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9");
+//  http.addHeader("Accept-Language", "en-US,en;q=0.9");
+   // http.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.150 Safari/537.36");
+  //http.addHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9");
+  //http.addHeader("Accept-Language", "en-US,en;q=0.9");
+    int httpResponseCode = http.get("https://turtle.wuaze.com/", sheetyEndpoint);
+    if (httpResponseCode > 0) {
+      String payload = http.readString();
+      Serial.println(payload);
+      Serial.println(WiFi.SSID());
+    } else {
+      Serial.print("Error getting data from Sheety API. HTTP response code: ");
+      Serial.println(httpResponseCode);
+    }
+
+    http.stop();
+  }
+
+  delay(6000); // Wait for 60 seconds before making the next request
+}
